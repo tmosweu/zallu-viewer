@@ -21,27 +21,23 @@ h1,h2,h3{font-family:Fraunces,Georgia,serif;font-weight:600;margin:0}
 h1{font-size:22px;line-height:1.25}h2{font-size:17px;margin-bottom:10px}
 .eyebrow{font:500 11px/1.3 Jost,sans-serif;letter-spacing:2.2px;text-transform:uppercase;color:var(--slate)}
 .card{background:#fff;border-radius:24px;padding:18px 20px;box-shadow:0 4px 0 var(--edge);margin-bottom:16px}
-.hero{border-radius:24px;padding:20px;color:#fff;margin-bottom:16px}
-.hero.emergency{background:var(--red);box-shadow:0 5px 0 var(--redEdge)}.hero.urgent{background:var(--amber);box-shadow:0 5px 0 var(--amberEdge)}.hero.routine{background:var(--green);box-shadow:0 5px 0 var(--greenEdge)}
-.hero .eyebrow{color:rgba(255,255,255,.85)}.hero h1{color:#fff;margin:6px 0 10px}.hero ul{margin:0 0 12px 18px;padding:0;font-size:15px}
-.hero .todo{background:rgba(255,255,255,.16);border-radius:16px;padding:12px 14px;font-size:15px}
 .ref{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;flex-wrap:wrap}
 .code{font:600 20px/1.2 Jost,sans-serif;letter-spacing:1.2px;font-variant-numeric:tabular-nums}
 .meta{color:var(--slate);font-size:14px}
 .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--brass);margin-right:6px;vertical-align:middle}
 .line{display:grid;grid-template-columns:26px 1fr;gap:12px;padding:10px 0;border-top:2px solid var(--rule)}.line:first-of-type{border-top:0}
-.line .m{font-family:Fraunces,serif;font-weight:600;font-size:16px;color:var(--ink)}.line .m.f{color:var(--red)}
-.line .v{font-size:15px}.flag{color:var(--red);font-weight:800}
+.line .m{font-family:Fraunces,serif;font-weight:600;font-size:16px;color:var(--ink)}.line .m.f{color:var(--brass)}
+.line .v{font-size:15px}.flag{color:var(--ink);font-weight:800}
 .pills{display:flex;flex-wrap:wrap;gap:8px}.pill{border-radius:999px;padding:6px 14px;font-size:14px;font-weight:800;background:#fff;border:1px solid #E4DFE6;box-shadow:0 3px 0 var(--edge)}
 .pill.sev{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 3px 0 var(--redEdge)}.pill small{font-weight:400;color:var(--slate);display:block;font-size:12px}.pill.sev small{color:#fff}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:15px}.kv .k{color:var(--slate)}.kv .v{font-weight:600}
 details{border-top:2px solid var(--rule);padding-top:12px}summary{cursor:pointer;font-family:Fraunces,serif;font-weight:600;font-size:16px}
 .note{border-radius:16px;padding:12px 14px;background:#fff;box-shadow:0 4px 0 var(--edge);margin-top:10px;font-size:15px}
 .tag{display:inline-block;font:500 12px/1 Jost,sans-serif;letter-spacing:.6px;border:2px solid;border-radius:999px;padding:6px 10px;margin-bottom:8px}
-.tag.safety{color:var(--red);border-color:var(--red)}.tag.consider{color:var(--amber);border-color:var(--amber)}.tag.service{color:var(--ink);border-color:var(--ink)}
+.reported{border-left:6px solid var(--brass)}.rep{margin:8px 0 10px;padding-left:20px}.rep li{margin:4px 0;font-size:16px;font-weight:600;color:var(--ink)}
 .disc{font-size:13px;color:var(--slate);margin-top:24px}
 .err{text-align:center;padding:48px 0}
-@media print{body{background:#fff}.wrap{max-width:none;padding:0}.btn{display:none}.card,.hero{box-shadow:none;border:1px solid #ddd;break-inside:avoid}details{display:block}details>*{display:block}}
+@media print{body{background:#fff}.wrap{max-width:none;padding:0}.btn{display:none}.card{box-shadow:none;border:1px solid #ddd;break-inside:avoid}details{display:block}details>*{display:block}}
 </style>
 </head>
 <body>
@@ -57,28 +53,25 @@ details{border-top:2px solid var(--rule);padding-top:12px}summary{cursor:pointer
   try{
     var bin=atob(h.replace(/-/g,'+').replace(/_/g,'/')); var u8=new Uint8Array(bin.length); for(var i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
     var d=JSON.parse(fflate.strFromU8(fflate.inflateSync(u8)));
-    if(d.v!==1) throw new Error('version');
+    if(d.v!==2) throw new Error('version');
   }catch(e){ document.querySelector('#app .err h1').textContent='This code could not be read'; return; }
-  var level={emergency:'Emergency',urgent:'Same-day review',routine:'Routine'}[d.tr.u]||d.tr.u;
-  var reasons=[].concat(d.tr.red,d.tr.urg);
-  var advice={emergency:'Call 999 or go to A&E now. Tell staff which warning signs were reported.',urgent:'Needs assessment today: same-day GP appointment, pharmacist review or NHS 111.',routine:'Suitable for a routine pharmacy or GP consultation. Escalate if warning signs develop.'}[d.tr.u]||'';
+  var reported=d.fl||[];
   var when=new Date(d.at); var whenS=isNaN(when)?d.at:when.toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'});
   var html='';
-  html+='<section class="hero '+esc(d.tr.u)+'" role="region" aria-label="'+esc(level)+'"><div class="eyebrow">'+esc(level)+'</div><h1>'+esc(d.tr.h)+'</h1>'
-    +(reasons.length?'<ul>'+reasons.map(function(r){return '<li>'+esc(r)+'</li>'}).join('')+'</ul>':'')
-    +'<div class="todo"><div class="eyebrow">What to do now</div>'+esc(advice)+'</div></section>';
+  html+='<section class="card reported" role="region" aria-label="Features the patient marked as significant"><div class="eyebrow">The patient marked these as significant</div>'
+    +(reported.length?'<ul class="rep">'+reported.map(function(r){return '<li>'+esc(r)+'</li>'}).join('')+'</ul>':'<div class="v">Nothing was marked as significant.</div>')
+    +'<div class="meta">These are the patient\u2019s own answers, in the order asked. Zallu does not assess, triage or rank them.</div></section>';
   html+='<section class="card ref"><div><div class="eyebrow"><span class="dot"></span>Reference</div><div class="code">'+esc(d.ref)+'</div><div class="meta">'+esc(d.pw)+' · '+esc(d.pt.age)+' · '+esc(d.pt.sex)+(d.pt.ini?' · '+esc(d.pt.ini):'')+(d.pt.preg?' · '+esc(d.pt.preg):'')+'</div></div><div class="meta">Created '+esc(whenS)+(d.photos?'<br>'+d.photos+' photo'+(d.photos>1?'s':'')+' on the patient’s phone':'')+'</div></section>';
   html+='<section class="card"><div class="eyebrow">Clinical snapshot</div><h2>'+esc(d.pw)+' · patient-reported</h2>';
   html+=d.sn.map(function(l){return '<div class="line"><div class="m'+(l.f?' f':'')+'">'+esc(l.m||'')+'</div><div><div class="eyebrow">'+esc(l.l)+'</div><div class="v'+(l.f?' flag':'')+'">'+esc(l.v)+'</div></div></div>'}).join('');
   html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Allergies</div>'+(d.hx.all.length?'<div class="pills">'+d.hx.all.map(function(a){return '<span class="pill'+(a.s?' sev':'')+'">'+esc(a.n)+'<small>'+esc(a.r)+'</small></span>'}).join('')+'</div>':'<div class="v">'+(d.hx.nka?'No known allergies':'Not answered')+'</div>')+'</div></div>';
   html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Medicines</div><div class="v">'+(d.hx.meds.length?d.hx.meds.map(esc).join('<br>'):(d.hx.medsState==='no'?'None taken':'Not answered'))+'</div></div></div>';
   if(d.hx.cond) html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Conditions</div><div class="v">'+esc(d.hx.cond)+'</div></div></div>';
-  if(d.tr.rf.length) html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Sepsis risk factors</div><div class="v flag">'+d.tr.rf.map(esc).join(' · ')+'</div></div></div>';
+  if((d.rf||[]).length) html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Background factors reported</div><div class="v">'+d.rf.map(esc).join(' · ')+'</div></div></div>';
   if(d.hx.life) html+='<div class="line"><div class="m"></div><div><div class="eyebrow">Smoking and alcohol</div><div class="v">'+esc(d.hx.life)+'</div></div></div>';
   html+='</section>';
-  if(d.notes.length){ html+='<section class="card"><div class="eyebrow">Decision-support prompts</div><div class="meta">Educational, rule-based prompts from the answers. Not a diagnosis.</div>'+d.notes.map(function(n){var k=n[0],t={safety:'Safety',consider:'Consider',service:'Pharmacy First (England): check criteria'}[k]||k;return '<div class="note"><span class="tag '+esc(k)+'">'+esc(t)+'</span><div>'+esc(n[1])+'</div></div>'}).join('')+'</section>'; }
   html+='<p class="meta">The full answer-by-answer record is on the patient’s phone (All answers tab) and in the PDF they can share.</p>';
-  html+='<p class="disc">Patient-reported information only. Zallu does not diagnose and is not medical advice. Prompts are educational decision support for a qualified clinician. This page decoded the summary from the link on your device; nothing was sent to or stored on a server.</p>';
+  html+='<p class="disc">Patient-reported answers only, recorded as the patient gave them. Zallu does not assess, triage, prioritise or diagnose, and nothing on this page is a clinical recommendation. This page decoded the summary from the link on your device; nothing was sent to or stored on a server.</p>';
   document.getElementById('app').innerHTML=html;
   document.title='Zallu '+d.ref;
 })();
